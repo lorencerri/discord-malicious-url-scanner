@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@discordjs/builders": "^0.5.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "discord-api-types": "^0.22.0",
+    "discord.js": "^13.1.0",
+    "dotenv": "^10.0.0",
+    "linkifyjs": "^3.0.0-beta.3",
+    "url-safety-scanner": "^1.0.4",
+    "virustotal-api": "^1.1.6",
+    "vtapi_v3": "^2.0.1"
+  }
+}
