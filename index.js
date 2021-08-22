@@ -8,17 +8,11 @@ const client = new Client({
 const VirusTotalApi = require("virustotal-api");
 const virusTotal = new VirusTotalApi(process.env.VT_API_KEY);
 
-const { Scanner } = require("url-safety-scanner");
-const myScanner = Scanner({
-    apiKey: process.env.GOOGLE_API_KEY,
-    clientId: "guardian-v2-323704",
-});
-
 const { find } = require("linkifyjs");
 
-const createAnalysisEmbed = (result) => {
-    return new MessageEmbed()
-        .setTitle(`Analysis`)
+const createAnalysisEmbed = (result, malicious) => {
+    const embed = new MessageEmbed()
+        .setTitle(malicious ? "Malicious URL Detected" : `Analysis`)
         .setColor(0x5865f2)
         .setDescription(
             `🔗 \`${result.url}\`\nScan Date: \`${result.scan_date}\``
@@ -29,6 +23,15 @@ const createAnalysisEmbed = (result) => {
                 result.total - result.positives
             }\`\nSafe? \`${result.positives > 0 ? "No" : "Yes"}\``
         );
+
+    if (malicious) {
+        embed.addField(
+            "Actions Taken",
+            "- Deleted Message\n- Added Muted Role"
+        );
+    }
+
+    return embed;
 };
 
 client.on("interactionCreate", async (interaction) => {
@@ -36,25 +39,47 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "ping") {
         await interaction.reply("Pong!");
-    }
-
-    if (interaction.commandName === "analyze") {
+    } else if (interaction.commandName === "analyze") {
         const url = interaction.options.getString("url");
         if (!url) return interaction.reply("Please provide a URL to analyze.");
-        console.log(url);
-
         const result = await virusTotal.urlReport(url, false, 1);
-
         interaction.reply({ embeds: [createAnalysisEmbed(result)] });
     }
 });
 
 client.on("messageCreate", async (message) => {
-    console.log(message);
+    if (message.author.bot) return;
+
     const results = find(message.content).filter((i) => i.type === "url");
     if (results.length > 0) {
+        console.log(results);
+
         for (var i = 0; i < results.length; i++) {
-            const vt_result = await virusTotal.urlReport(results[i].url);
+            console.log(`Scanning ` + results[i].value);
+            var vt_result;
+            try {
+                vt_result = await virusTotal.urlReport(
+                    results[i].value,
+                    false,
+                    1
+                );
+            } catch (e) {
+                return console.log("Rate Limit");
+            }
+            if (vt_result && vt_result.positives > 0) {
+                message.delete();
+                const mutedRole = message.guild.roles.cache.find(
+                    (r) => r.name === "Muted"
+                );
+                if (mutedRole) message.member.roles.add(mutedRole);
+                if (message.guild.id === "343572980351107077") {
+                    message.guild.channels.cache
+                        .get("398491167005868043")
+                        .send({
+                            embeds: [createAnalysisEmbed(vt_result, true)],
+                        });
+                }
+            }
         }
     }
 });
