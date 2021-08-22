@@ -14,7 +14,6 @@ const commands = [
                 .setDescription("Enter a URL")
                 .setRequired(true)
         ),
-    new SlashCommandBuilder().setName("ping").setDescription("Returns pong!"),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
