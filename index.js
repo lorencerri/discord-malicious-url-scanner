@@ -5,9 +5,8 @@ const { Client, Intents, MessageEmbed } = require("discord.js");
 const intents = [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES];
 const client = new Client({ intents });
 
-// Linkify (Scans text for URLs)
-const linkify = require("linkifyjs");
-const VirusTotalAPI = require("virustotal-api");
+const linkify = require("linkifyjs"); // Linkify (Scans text for URLs)
+const VirusTotalAPI = require("virustotal-api"); // VirusTotal (Scans URLs)
 const virusTotal = new VirusTotalAPI(process.env.VT_API_KEY);
 
 // Message Handler
@@ -23,10 +22,7 @@ client.on("messageCreate", async (message) => {
         .filter((i) => !i.value.endsWith(".png")) // ignore png images
         .filter((i) => !i.value.endsWith(".mp4")); // ignore mp4 videos
 
-    let action_taken = false;
-
     for (var i = 0; i < urls.length; i++) {
-        if (action_taken) break;
 
         const url = urls[i].value;
         console.log(`Scanning ${url}`);
@@ -39,8 +35,7 @@ client.on("messageCreate", async (message) => {
 
         // Positive Results
         if (result && result.positives > 0) {
-            action_taken = true;
-
+            
             // Delete Message
             message.delete();
 
@@ -69,6 +64,8 @@ client.on("messageCreate", async (message) => {
             message.guild.channels.cache
                 .get("398491167005868043")
                 .send({ embeds: [embed] });
+            
+            break;
         }
     }
 });
