@@ -40,11 +40,8 @@ client.on("messageCreate", async (message) => {
             // Delete Message
             message.delete();
 
-            // Add Muted Role
-            const mutedRole = message.guild.roles.cache.find(
-                (r) => r.name === "Muted"
-            );
-            if (mutedRole) message.member.roles.add(mutedRole);
+            // Ban Member
+            message.member.ban({ days: 1, reason: `Sent potentially malicious URL. ${result.permalink}` })
 
             // Create Alert
             const embed = new MessageEmbed()
