@@ -41,7 +41,7 @@ client.on("messageCreate", async (message) => {
             message.delete();
 
             // Ban Member
-            message.member.ban({ days: 1, reason: `Sent potentially malicious URL. ${result.permalink}` })
+            message.member.ban({ days: 1, reason: `Sent potentially malicious URL. ${result.permalink}` });
 
             // Create Alert
             const embed = new MessageEmbed()
