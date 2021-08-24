@@ -1,13 +1,61 @@
 require("dotenv").config();
 
 // Discord.js
-const { Client, Intents, MessageEmbed } = require("discord.js");
+const {
+    Client,
+    Intents,
+    MessageEmbed,
+    MessageButton,
+    MessageActionRow,
+} = require("discord.js");
 const intents = [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES];
 const client = new Client({ intents });
 
 const linkify = require("linkifyjs"); // Linkify (Scans text for URLs)
 const VirusTotalAPI = require("virustotal-api"); // VirusTotal (Scans URLs)
 const virusTotal = new VirusTotalAPI(process.env.VT_API_KEY);
+
+// Button Handler
+client.on("interactionCreate", (interaction) => {
+    if (!interaction.isButton()) return;
+
+    // Handle descriptive buttons
+    if (interaction.customId === "_") {
+        interaction.reply({
+            ephemeral: true,
+            content: "*This button just displays information...*",
+        });
+    }
+
+    const executor = interaction.member;
+    const action = interaction.customId.split("_")[0];
+
+    if (action === "ban") {
+        if (!executor.roles.cache.find((r) => r.name === "Moderator"))
+            return interaction.reply({
+                ephemeral: true,
+                content: "You do not have permission to use this button.",
+            });
+
+        const sender = interaction.member.guild.members.cache.get(
+            interaction.customId.split("_")[1]
+        );
+        sender.ban({ days: 1, reason: "Banned by moderator" });
+
+        interaction.reply({
+            content: `${sender.user.tag} (${sender.user.id}) was successfully banned by ${executor.user.tag}.`,
+        });
+
+        const row = new MessageActionRow().addComponents(
+            new MessageButton()
+                .setCustomId("_")
+                .setLabel("Successfully Banned!")
+                .setStyle("SUCCESS")
+        );
+
+        interaction.message.edit({ components: [row] });
+    }
+});
 
 // Message Handler
 client.on("messageCreate", async (message) => {
@@ -21,10 +69,9 @@ client.on("messageCreate", async (message) => {
         .filter((i) => !i.value.startsWith("https://discord.com/")) // ignore discord links
         .filter((i) => !i.value.endsWith(".png")) // ignore png images
         .filter((i) => !i.value.endsWith(".mp4")); // ignore mp4 videos
-        // ignoring certain files isn't necessary, it's only to ensure VirusTotal ratelimits aren't met
+    // ignoring certain files isn't necessary, it's only to ensure VirusTotal ratelimits aren't met
 
     for (var i = 0; i < urls.length; i++) {
-
         const url = urls[i].value;
         console.log(`Scanning ${url}`);
 
@@ -36,12 +83,14 @@ client.on("messageCreate", async (message) => {
 
         // Positive Results
         if (result && result.positives > 0) {
-            
             // Delete Message
             message.delete();
 
-            // Ban Member
-            message.member.ban({ days: 1, reason: `Sent potentially malicious URL. ${result.permalink}` });
+            // Add Muted Role
+            const mutedRole = message.guild.roles.cache.find(
+                (role) => role.name === "Muted"
+            );
+            message.member.roles.add(mutedRole);
 
             // Create Alert
             const embed = new MessageEmbed()
@@ -58,11 +107,19 @@ client.on("messageCreate", async (message) => {
                 )
                 .addField("Sender", `<@${senderId}> \`(${senderId})\``, true);
 
+            // Add ban prompt button
+            const row = new MessageActionRow().addComponents(
+                new MessageButton()
+                    .setCustomId(`ban_${senderId}`)
+                    .setLabel("Ban")
+                    .setStyle("DANGER")
+            );
+
             // Send Alert
             message.guild.channels.cache
-                .get("398491167005868043")
-                .send({ embeds: [embed] });
-            
+                .get("873249087514894366")
+                .send({ embeds: [embed], components: [row] });
+
             break;
         }
     }
