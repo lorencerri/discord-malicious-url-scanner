@@ -64,8 +64,7 @@ client.on("messageCreate", async (message) => {
         .filter((i) => i.type === "url")
         .filter((i) => !i.value.startsWith("https://discord.com/")) // ignore discord links
         .filter((i) => !i.value.endsWith(".png")) // ignore png images
-        .filter((i) => !i.value.endsWith(".mp4")) // ignore mp4 videos
-        .filter((i) => i.value.toLowerCase() !== "user.id"); // ignore this string
+        .filter((i) => !i.value.endsWith(".mp4")); // ignore mp4 videos
     // ignoring certain files isn't necessary, it's only to ensure VirusTotal ratelimits aren't met
 
     for (var i = 0; i < urls.length; i++) {
@@ -77,6 +76,10 @@ client.on("messageCreate", async (message) => {
         try {
             result = await virusTotal.urlReport(url, false, 1);
         } catch (err) {}
+
+        // Ignore Kaspersky (high false positives)
+        if (result?.scans?.Kaspersky?.detected) result.positives -= 1;
+        total -= 1;
 
         // Positive Results
         if (result && result.positives > 0) {
