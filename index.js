@@ -65,6 +65,7 @@ client.on("messageCreate", async (message) => {
         .filter((i) => !i.value.startsWith("https://discord.com/")) // ignore discord links
         .filter((i) => !i.value.endsWith(".png")) // ignore png images
         .filter((i) => !i.value.endsWith(".mp4")); // ignore mp4 videos
+		.filter((i) => i.toLowerCase() !== 'user.id') // ignore this string
     // ignoring certain files isn't necessary, it's only to ensure VirusTotal ratelimits aren't met
 
     for (var i = 0; i < urls.length; i++) {
