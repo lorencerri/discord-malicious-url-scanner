@@ -42,14 +42,10 @@ client.on("interactionCreate", (interaction) => {
         );
         sender.ban({ days: 1, reason: "Banned by moderator" });
 
-        interaction.reply({
-            content: `${sender.user.tag} (${sender.user.id}) was successfully banned by ${executor.user.tag}.`,
-        });
-
         const row = new MessageActionRow().addComponents(
             new MessageButton()
                 .setCustomId("_")
-                .setLabel("Successfully Banned!")
+                .setLabel(`Successfully banned by ${executor.user.tag}!`)
                 .setStyle("SUCCESS")
         );
 
