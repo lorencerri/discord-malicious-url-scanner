@@ -79,7 +79,7 @@ client.on("messageCreate", async (message) => {
 
         // Ignore Kaspersky (high false positives)
         if (result?.scans?.Kaspersky?.detected) result.positives -= 1;
-        total -= 1;
+        result?.total -= 1;
 
         // Positive Results
         if (result && result.positives > 0) {
