@@ -40,7 +40,10 @@ client.on("interactionCreate", (interaction) => {
         const sender = interaction.member.guild.members.cache.get(
             interaction.customId.split("_")[1]
         );
-        sender.ban({ days: 1, reason: "Banned by moderator" });
+        sender.ban({
+            days: 1,
+            reason: `Banned by ${executor.user.tag} (manual from malicious link)`,
+        });
 
         const row = new MessageActionRow().addComponents(
             new MessageButton()
