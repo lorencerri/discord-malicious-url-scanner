@@ -81,12 +81,8 @@ client.on("messageCreate", async (message) => {
             result = await virusTotal.urlReport(url, false, 1);
         } catch (err) {}
 
-        // Ignore Kaspersky (high false positives)
-        if (result?.scans?.Kaspersky?.detected) result.positives -= 1;
-        result.total -= 1;
-
-        // Positive Results
-        if (result && result.positives > 0) {
+        // Positive Results (greater than 1 due to false positives)
+        if (result && result.positives > 1) {
             // Delete Message
             message.delete();
 
