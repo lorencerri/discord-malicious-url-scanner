@@ -116,7 +116,7 @@ client.on("messageCreate", async (message) => {
                     .setStyle("DANGER"),
                 new MessageButton()
                     .setCustomId("cancel")
-                    .setLabel("Canel")
+                    .setLabel("Cancel")
                     .setStyle("PRIMARY")
             );
 
