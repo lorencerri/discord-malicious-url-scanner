@@ -40,6 +40,7 @@ client.on("interactionCreate", (interaction) => {
         const sender = interaction.member.guild.members.cache.get(
             interaction.customId.split("_")[1]
         );
+
         sender.ban({
             days: 1,
             reason: `Banned by ${executor.user.tag} (manual from malicious link)`,
@@ -52,8 +53,8 @@ client.on("interactionCreate", (interaction) => {
                 .setStyle("SUCCESS")
         );
 
-        interaction.message.edit({ components: [row] });
-    }
+        interaction.update({ components: [row] });
+    } else if (action === "cancel") interaction.update({ components: [] });
 });
 
 // Message Handler
@@ -112,7 +113,11 @@ client.on("messageCreate", async (message) => {
                 new MessageButton()
                     .setCustomId(`ban_${senderId}`)
                     .setLabel("Ban")
-                    .setStyle("DANGER")
+                    .setStyle("DANGER"),
+                new MessageButton()
+                    .setCustomId("cancel")
+                    .setLabel("Canel")
+                    .setStyle("PRIMARY")
             );
 
             // Send Alert
