@@ -108,7 +108,7 @@ client.on("messageCreate", async (message) => {
                 )
                 .addField("Sender", `<@${senderId}> \`(${senderId})\``, true);
 
-            // Add ban prompt button
+            // Add buttons
             const row = new MessageActionRow().addComponents(
                 new MessageButton()
                     .setCustomId(`ban_${senderId}`)
