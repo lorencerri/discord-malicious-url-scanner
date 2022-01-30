@@ -78,9 +78,6 @@ client.on("messageCreate", async (message) => {
 		const url = urls[i].value;
 		console.log(`Scanning ${url}`);
 
-		if (cache.has(`${senderId}-${url}`)) return;
-		else cache.add(`${senderId}-${url}`);
-
 		// Catch Rate Limit Errors
 		var result;
 		try {
@@ -91,6 +88,9 @@ client.on("messageCreate", async (message) => {
 		if (result && result.positives > 1) {
 			// Delete Message
 			message.delete();
+
+			if (cache.has(`${senderId}-${url}`)) return;
+			else cache.add(`${senderId}-${url}`);
 
 			// Add Muted Role
 			const mutedRole = message.guild.roles.cache.find(
